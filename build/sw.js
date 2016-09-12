@@ -27,7 +27,7 @@ function fetchBody(req, title) {
 }
 
 function getTemplate() {
-    return swt.cacheFirst(new Request(tplURL));
+    return swt.cacheFirst(new Request(tplURL)).then(res => res.text());
 }
 
 function cheapBodyInnerHTML(html) {
