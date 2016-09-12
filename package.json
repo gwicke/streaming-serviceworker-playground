@@ -1,0 +1,28 @@
+{
+  "name": "streaming-serviceworker-playground",
+  "version": "0.0.0",
+  "description": "Playing with streaming content composition in a ServiceWorker.",
+  "main": "build/sw.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "browserify lib/sw.js -d > build/sw.js",
+    "prepublish": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gwicke/streaming-serviceworker-playground.git"
+  },
+  "author": "Gabriel Wicke <gwicke@wikimedia.org>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/gwicke/streaming-serviceworker-playground/issues"
+  },
+  "dependencies": {
+    "elematch": "^0.3.0",
+    "sw-toolbox": "^3.2.1"
+  },
+  "devDependencies": {
+    "browserify": "^13.1.0",
+    "minifyify": "^7.3.3"
+  }
+}
