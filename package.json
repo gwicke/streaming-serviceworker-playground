@@ -5,7 +5,7 @@
   "main": "build/sw.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "browserify lib/sw.js -d > build/sw.js",
+    "build": "browserify lib/sw.js -o build/sw.js",
     "prepublish": "npm run build"
   },
   "repository": {
