@@ -5,6 +5,15 @@ const tplURL = '/wiki/Test';
 const swt = require('sw-toolbox');
 
 swt.precache([tplURL]);
+swt.router.default = function(request, options) {
+    if (request instanceof Request) {
+        return swt.cacheFirst(request, options);
+    } else {
+        return swt.cacheFirst(new Request(request), options);
+    }
+};
+swt.options.cache.name = 'test';
+swt.options.cache.maxEntries = 1000;
 
 function fetchBody(req, title) {
 	const protoHost = req.url.match(/^(https?:\/\/[^\/]+)\//)[1];
@@ -72,12 +81,13 @@ function assemblePage(req) {
         .then(results => injectBody(results[0], results[1], req, title));
 }
 
-swt.router.get(/https?:\/\/[^\/]+\/w\/?iki\/[^?]+$/, (request, options) => assemblePage(request)
-        .then(body => new Response(body, {
-            headers: {
-                'content-type': 'text/html;charset=utf-8'
-            }
-        })));
+swt.router.get(/https?:\/\/[^\/]+\/w\/?iki\/[^?]+$/,
+        (request, options) => assemblePage(request)
+            .then(body => new Response(body, {
+                headers: {
+                    'content-type': 'text/html;charset=utf-8'
+                }
+            })));
 
 },{"sw-toolbox":13}],2:[function(require,module,exports){
 /*
