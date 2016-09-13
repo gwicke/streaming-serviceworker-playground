@@ -92,6 +92,11 @@ swt.router.get(/https?:\/\/[^\/]+\/w\/?iki\/[^?]+$/,
                 }
             })));
 
+// Boilerplate to ensure our service worker takes control of the page as soon
+// as possible.
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', () => self.clients.claim());
+
 },{"sw-toolbox":13}],2:[function(require,module,exports){
 /*
   Copyright 2014 Google Inc. All Rights Reserved.
