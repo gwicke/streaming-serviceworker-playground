@@ -5,15 +5,16 @@ const tplURL = '/wiki/Test';
 const swt = require('sw-toolbox');
 
 swt.precache([tplURL]);
+// swt.options.debug = true;
 swt.router.default = function(request, options) {
     if (request instanceof Request) {
-        return swt.cacheFirst(request, options);
+        return swt.networkFirst(request, options);
     } else {
-        return swt.cacheFirst(new Request(request), options);
+        return swt.networkFirst(new Request(request), options);
     }
 };
-// swt.options.cache.name = 'test';
-// swt.options.cache.maxEntries = 1000;
+swt.options.cache.name = 'default';
+swt.options.cache.maxEntries = 5000;
 
 function fetchBody(req, title) {
 	const protoHost = req.url.match(/^(https?:\/\/[^\/]+)\//)[1];
@@ -29,10 +30,12 @@ function fetchBody(req, title) {
         if (res.status === 200) {
             return res.text();
         } else {
-            return "<body>Error fetching body for " + title + ': '
-                + res.status + "</body>";
+            return `<body><em style="color: red">Error fetching body for ${title}:
+                ${res.status}<em></body>`;
         }
-    });
+    },
+    err => `<body><em style="color: red">Error fetching body for ${title}:
+            ${err}</em></body>`);
 }
 
 function getTemplate() {
