@@ -53,12 +53,14 @@
 
 	swt.precache([tplURL]);
 	// swt.options.debug = true;
+	const testHosts = /^https?:\/\/(?:localhost:8934|swproxy.wmflabs.org)\//;
 	swt.router.default = function(request, options) {
-	    if (request instanceof Request) {
-	        return swt.networkFirst(request, options);
-	    } else {
-	        return swt.networkFirst(new Request(request), options);
+	    if (testHosts.test(request.url)) {
+	        // Performance hack: rewrite to enwiki.
+	        const url = request.url.replace(testHosts, 'https://en.wikipedia.org/');
+	        request = new Request(url, request);
 	    }
+	    return swt.networkFirst(request, options);
 	};
 	swt.options.cache.name = 'default';
 	swt.options.cache.maxEntries = 5000;
@@ -95,8 +97,8 @@
 	};
 
 	function fetchBody(req, title) {
-		const protoHost = req.url.match(/^(https?:\/\/[^\/]+)\//)[1];
-	    return swt.cacheFirst(new Request(protoHost + '/api/rest_v1/page/html/'
+		//const protoHost = req.url.match(/^(https?:\/\/[^\/]+)\//)[1];
+	    return swt.cacheFirst(new Request('https://en.wikipedia.org/api/rest_v1/page/html/'
 	                + encodeURIComponent(decodeURIComponent(title))), {
 	                    cache: {
 	                        name: 'api_html',
@@ -165,7 +167,7 @@
 	            .then(tpl => {
 	                compiledTemplate = new HTMLTransformReader(tpl, pageTemplateTransforms).drainSync();
 	                return compiledTemplate;
-	            })
+	            });
 	    }
 	}
 
