@@ -2,7 +2,13 @@
 	"predef": [
 		"setImmediate",
 		"Map",
-		"Set"
+		"Set",
+        "Request",
+        "Response",
+        "ReadableStream",
+        "TextEncoder",
+        "TextDecoder",
+        "self"
 	],
 
 	"bitwise": true,

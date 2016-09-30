@@ -5,8 +5,7 @@
   "main": "build/sw.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "browserify lib/sw.js -o build/sw.js",
-    "prepublish": "npm run build"
+    "build": "webpack"
   },
   "repository": {
     "type": "git",
@@ -18,11 +17,11 @@
     "url": "https://github.com/gwicke/streaming-serviceworker-playground/issues"
   },
   "dependencies": {
-    "elematch": "^0.3.0",
-    "sw-toolbox": "^3.2.1"
+    "sw-toolbox": "^3.2.1",
+    "web-html-stream": "^2.0.5",
+    "web-stream-util": "^0.3.4"
   },
   "devDependencies": {
-    "browserify": "^13.1.0",
-    "minifyify": "^7.3.3"
+    "webpack": "^1.13.2"
   }
 }
