@@ -54,13 +54,18 @@
 	swt.precache([tplURL]);
 	// swt.options.debug = true;
 	const testHosts = /^https?:\/\/(?:localhost:8934|swproxy.wmflabs.org)\//;
-	swt.router.default = function(request, options) {
+	function rewriteRequestHost(request) {
 	    if (testHosts.test(request.url)) {
 	        // Performance hack: rewrite to enwiki.
 	        const url = request.url.replace(testHosts, 'https://en.wikipedia.org/');
 	        request = new Request(url, request);
 	    }
-	    return swt.networkFirst(request, options);
+	    return request;
+	}
+
+
+	swt.router.default = function(request, options) {
+	    return swt.networkFirst(rewriteRequestHost(request), options);
 	};
 	swt.options.cache.name = 'default';
 	swt.options.cache.maxEntries = 5000;
@@ -209,7 +214,7 @@
 	// Use cacheFirst for RL requests
 	swt.router.get("/w/load.php",
 	         (request, options) => {
-	             return swt.cacheFirst(request, options);
+	             return swt.cacheFirst(rewriteRequestHost(request), options);
 	         });
 
 	// Boilerplate to ensure our service worker takes control of the page as soon
