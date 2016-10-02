@@ -103,7 +103,7 @@
 
 	function fetchBody(req, title) {
 		//const protoHost = req.url.match(/^(https?:\/\/[^\/]+)\//)[1];
-	    return swt.cacheFirst(new Request('https://en.wikipedia.org/api/rest_v1/page/html/'
+	    return swt.networkFirst(new Request('https://en.wikipedia.org/api/rest_v1/page/html/'
 	                + encodeURIComponent(decodeURIComponent(title))), {
 	                    cache: {
 	                        name: 'api_html',
