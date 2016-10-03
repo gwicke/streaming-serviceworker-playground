@@ -134,12 +134,6 @@
 	                'modules=$1%7Cmediawiki.skinning.content.parsoid%7Cext.cite.style&'));
 	}
 
-	const escapes = {
-	    '<': '&lt;',
-	    '"': '&quot;',
-	    "'": '&#39;'
-	};
-
 	class HackyReplaceReader {
 	    constructor(input, ctx) {
 	        this._reader = streamUtil.toReader(input);
@@ -175,6 +169,12 @@
 	            });
 	    }
 	}
+
+	const escapes = {
+	    '<': '&lt;',
+	    '"': '&quot;',
+	    "'": '&#39;'
+	};
 
 	function assemblePage(req, tpl) {
 	    var title = req.url.match(/\/w\/?iki\/([^?]+)$/)[1];
