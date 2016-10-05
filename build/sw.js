@@ -190,7 +190,8 @@
 	};
 
 	function assemblePage(req, tpl) {
-	    const title = req.url.match(/\/w\/?iki\/([^?]+)$/)[1];
+	    console.log(req.url);
+	    const title = req.url.match(/\/wiki\/([^?]+)$/)[1];
 	    const ctx = {
 	        req,
 	        title,
@@ -213,7 +214,7 @@
 	}
 
 	// Wiki page entry point
-	swt.router.get(/https?:\/\/[^\/]+\/wiki\/.+$/, (request, options) => {
+	swt.router.get(/https?:\/\/(?!login\.)[^\/]+\/wiki\/.+$/, (request, options) => {
 	    return getCompiledTemplate()
 	        .then((tpl) => {
 	            const body = assemblePage(request, tpl);
