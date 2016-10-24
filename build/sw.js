@@ -46,12 +46,12 @@
 
 	'use strict';
 
-	const tplURL = 'https://crossorigin.me/https://en.m.wikipedia.org/wiki/A-sharp';
+	const tplURL = '/w/index.php?title=Test';
 	const swt = __webpack_require__(1);
 	const HTMLTransformReader = __webpack_require__(17).HTMLTransformReader;
 	const streamUtil = __webpack_require__(18);
 
-	const testHosts = /^https?:\/\/(?:localhost:8934|swproxy(?:_mobile)?.wmflabs.org)\//;
+	const testHosts = /^https?:\/\/(?:localhost:8934|swproxy.wmflabs.org)\//;
 	function rewriteRequestHost(request) {
 	    if (testHosts.test(request.url)) {
 	        // Performance hack: rewrite to enwiki.
@@ -89,7 +89,7 @@
 	    // const protoHost = req.url.match(/^(https?:\/\/[^\/]+)\//)[1];
 	    const normalizedTitle = encodeURIComponent(decodeURIComponent(title));
 	    const url = `https://en.wikipedia.org/api/rest_v1/page/html/${normalizedTitle}`;
-	    return swt.cacheFirst(new Request(url), {
+	    return swt.networkFirst(new Request(url), {
 	        cache: {
 	            name: 'api_html',
 	            maxEntries: 100,
@@ -138,10 +138,10 @@
 	            if (res.done) {
 	                return res;
 	            }
-	            if (typeof res.value === 'string' && /A-sharp/g.test(res.value)) {
+	            if (typeof res.value === 'string') {
 	                // Don't care about chunk boundaries for this hack.. but if we
 	                // did, we'd just hold onto the last three bytes.
-	                res.value = res.value.replace(/A-sharp/g, this._ctx.htmlTitle);
+	                res.value = res.value.replace(/Test/g, this._ctx.htmlTitle);
 	            }
 	            return res;
 	        });
@@ -157,10 +157,10 @@
 	    transforms: [
 	        // Very incomplete.
 	        {
-	            selector: 'h1[id="section_0"]',
+	            selector: 'h1[id="firstHeading"]',
 	            handler(node) {
 	                return (ctx) => {
-	                    return `<h1 id="section_0">${ctx.htmlTitle}</h1>`;
+	                    return `<h1 id="firstHeading">${ctx.htmlTitle}</h1>`;
 	                };
 	            }
 	        }, {
