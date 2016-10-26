@@ -155,7 +155,16 @@
 	// Template handlers.
 	const pageTemplateTransforms = {
 	    transforms: [
-	        // Very incomplete.
+	        // Inline stylesheets.
+	        {
+	            selector: 'link[rel="stylesheet"]',
+	            handler(node) {
+	                return swt.cacheFirst(new Request(node.attributes.href))
+	                .then(res => res.text())
+	                .then(style => `<style>${style}</style>`);
+	            }
+	        },
+	        // Inject the heading.
 	        {
 	            selector: 'h1[id="firstHeading"]',
 	            handler(node) {
@@ -163,7 +172,9 @@
 	                    return `<h1 id="firstHeading">${ctx.htmlTitle}</h1>`;
 	                };
 	            }
-	        }, {
+	        },
+	        // Inject the actual page content.
+	        {
 	            selector: 'div[id="mw-content-text"]',
 	            handler(node) {
 	                return (ctx) => {
@@ -1836,7 +1847,7 @@
 	const ATTRIB_NAME_PATTERN = '[^\\s\\0"\'>/=\x00-\x1F\x7F-\x9F]+';
 	const ATTRIB_PATTERN = `\\s+(${ATTRIB_NAME_PATTERN})=(?:"([^"]*)"|'([^']*)')|`;
 	const ATTRIB = new RegExp(ATTRIB_PATTERN, 'g');
-	const TAG_END = new RegExp('\\s*\/?>|', 'g');
+	const TAG_END = new RegExp('\\s*(\/?)>|', 'g');
 
 	function escapeRegex(re) {
 	    return re.replace(/[\^\\$*+?.()|{}\[\]\/]/g, '\\$&');
@@ -2078,8 +2089,9 @@
 
 	    _matchTagEnd() {
 	        TAG_END.lastIndex = this._lastIndex;
-	        TAG_END.exec(this._buffer);
+	        const match = TAG_END.exec(this._buffer);
 	        this._lastIndex = TAG_END.lastIndex;
+	        return !!match[1];
 	    }
 
 	    _matchElement() {
@@ -2089,7 +2101,6 @@
 	            // First call.
 	            re.targetTag.lastIndex = this._lastIndex;
 
-	            // TODO: Move this to matchElement!
 	            // Try to match a target tag.
 	            const targetMatch = re.targetTag.exec(this._buffer);
 	            // Match the remainder of the element.
@@ -2111,8 +2122,13 @@
 	                // regexp asserts that the entire tag (incl attributes) is
 	                // available.
 	                const attributes = this._matchAttributes();
+
 	                // Consume the tag end & update this._lastIndex
-	                this._matchTagEnd();
+	                // XXX: Also support serialization of self-closing tags
+	                // without /> by checking nodeName against a list of
+	                // self-closing tags? Would need look-ahead to consume
+	                // optional end tag in that case.
+	                const isSelfClosingTag = this._matchTagEnd();
 
 	                // Set up elementMatcherArgs
 	                this._activeMatcherArgs = args = {};
@@ -2130,6 +2146,26 @@
 	                    outerHTML: this._buffer.slice(re.nonTargetStartTag.lastIndex, this._lastIndex),
 	                    innerHTML: '',
 	                };
+
+	                if (isSelfClosingTag) {
+	                    // Close out the match.
+	                    if (args.rule.stream) {
+	                        args.node.outerHTML = new ReadableStream({
+	                            start: constroller => {
+	                                controller.enqueue(args.node.outerHTML);
+	                                controller.close();
+	                            }
+	                        });
+	                        args.node.innerHTML = new ReadableStream({
+	                            start: constroller => controller.close()
+	                        });
+	                    }
+	                    this._matches.push(args.rule.handler(args.node, this._options.ctx));
+	                    this._activeMatcher = null;
+	                    this._activeMatcherArgs = null;
+	                    return;
+	                }
+
 	                if (args.rule.stream) {
 	                    args.node.outerHTML = new ReadableStream({
 	                        start: controller => {
@@ -2560,7 +2596,11 @@
 	                // TODO: check decoder for completeness.
 	                return accum;
 	            }
-	            accum += decoder.decode(res.value, { stream: true });
+	            if (typeof res.value === 'string') {
+	                accum += res.value;
+	            } else {
+	                accum += decoder.decode(res.value, { stream: true });
+	            }
 	            return pump();
 	        });
 	    }
